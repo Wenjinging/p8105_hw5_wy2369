@@ -43,7 +43,27 @@ homicide_data =
 
 In the raw data, there are **`r nrow(homicide_data)`** rows and **`r ncol(homicide_data)`** columns. It contains **`r ncol(homicide_data)`** important variables which are uid (`uid`), dates of report (`reported_date`), last and first names of victim (`victim_last`and `victim_first`), race of victim (`victim_race`), age of victim (`victim_age`), sex of victim (`victim_sex`), variables of location (`city`, `state`, `lat` and `lon` ), and the status of case (`disposition`) from 50 large cities in the U.S.
 
-### Create a city_state variable
+### Create a `city_state` variable
+
+Using mutate function to create a new variable. 
+
+```{r}
+homicide_df = 
+  homicide_data %>% 
+  mutate(city_state = str_c(city, ",", state)) 
+```
+
+### Find the total number of homicides within cities and the number of unsolved homicides
+
+```{r}
+homicide_df %>% 
+  group_by (city_state) %>% 
+  count(city_state) %>% 
+  summarize(n)%>%
+   knitr::kable()
+
+```
+
 
 (e.g. “Baltimore, MD”) and then summarize within cities to obtain the total number of homicides and the number of unsolved homicides (those for which the disposition is “Closed without arrest” or “Open/No arrest”).
 
