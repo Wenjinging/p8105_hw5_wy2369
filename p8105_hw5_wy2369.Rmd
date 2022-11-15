@@ -7,6 +7,8 @@ author: Wenjing Yang
 
 ```{r, include=FALSE}
 library(tidyverse)
+library(p8105.datasets)
+library(viridis)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -26,6 +28,22 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 # Problem 1
+
+### Imports the data
+
+The code chunk below imports the data in individual spreadsheets contained in `./data/zip_data/`. To do this, I create a dataframe that includes the list of all files in that directory and the complete path to each file. 
+
+As a next step, I `map` over paths and import data using the `read_csv` function. Finally, I `unnest` the result of `map`.
+
+```{r}
+full_df = 
+  tibble(
+    files = list.files("data/zip_data/"),
+    path = str_c("data/zip_data/", files)
+  ) %>% 
+  mutate(data = map(path, read_csv)) %>% 
+  unnest()
+```
 
 # Problem 2
 
