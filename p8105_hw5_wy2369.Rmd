@@ -53,18 +53,42 @@ homicide_df =
   mutate(city_state = str_c(city, ",", state)) 
 ```
 
-### Find the total number of homicides within cities and the number of unsolved homicides
+### Find the total number of homicides within cities.
 
 ```{r}
 homicide_df %>% 
-  group_by (city_state) %>% 
+  group_by(city_state) %>% 
   count(city_state) %>% 
-  summarize(n)%>%
-   knitr::kable()
-
+  summarize(n) %>%
+  knitr::kable()
 ```
 
+From this table, we could find the total number of homicides within 51 cities not 50, and there is one uncommon data from **Tulsa,AL**. Since I know **Tulsa,AL** does not exist in the U.S, we should probably ignore this data from `homicide_df` dataset. 
 
-(e.g. “Baltimore, MD”) and then summarize within cities to obtain the total number of homicides and the number of unsolved homicides (those for which the disposition is “Closed without arrest” or “Open/No arrest”).
+### Find the number of unsolved homicides
+
+```{r}
+tidy_homicide_df = 
+  homicide_df %>% 
+  filter(city_state != "Tulsa,AL") %>% 
+  mutate(
+    homicide_status =  ifelse(disposition != "Closed by arrest", "unsolved", "solved")
+  )
+
+tidy_homicide_df %>% 
+  group_by(city_state) %>% 
+  summarize(
+    unsolved = sum(homicide_status == "unsolved"),
+    total_homicides = n()) %>% 
+  knitr::kable()
+```
+
+From this table, we could find the number of unsolved homicides (those for which the disposition is “Closed without arrest” or “Open/No arrest”).
+
+### Use the `prop.test` function to estimate the proportion of homicides that are unsolved
+
+```{r}
+
+```
 
 
