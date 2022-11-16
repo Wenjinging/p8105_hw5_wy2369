@@ -135,7 +135,7 @@ Unsolve_data =
     total_homicides = n())
 
 Unsolve_data %>% 
-    knitr::kable(col.names = c("city, state", "unsolved homicides cases", "total homicides cases"))
+    knitr::kable(col.names = c("city, state", "unsolved homicides", "total homicides"))
 ```
 
 From this table, we could find the total number of homicides within 50 cities and the number of unsolved homicides (those for which the disposition is “Closed without arrest” or “Open/No arrest”).
@@ -172,13 +172,35 @@ all_test =
     proportion = map(proportion, broom::tidy)
   ) %>% 
   unnest() %>% 
-  select(city_state, unsolved, total_homicides, estimate, conf.low,conf.high) %>% 
+  select(city_state, unsolved, total_homicides, estimate, conf.low,conf.high)
+  
+all_test %>% 
   knitr::kable(
     digits = 3,
     col.names = c("city, state", "unsolved cases", "total cases", "estimate proportion", "lower CI", "upper CI"))
 
-all_test
 ```
+
+### Make a plot shows the estimates and CIs for each city. 
+
+Using this code chunk to create a plot shows the estimates and CIs for each city, and add error bars based on the upper and lower limits.
+
+```{r}
+all_test %>% 
+  mutate(
+   city_state = fct_reorder(city_state,estimate) 
+  ) %>% 
+  ggplot(aes(x = city_state, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "The estimates and CIs for each city with errorbar",
+       x = "City, State",
+       y = "Estimate Proportion") 
+
+```
+
+# Problem 3
 
 
 
