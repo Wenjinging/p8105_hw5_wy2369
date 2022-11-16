@@ -30,7 +30,7 @@ scale_fill_discrete = scale_fill_viridis_d
 
 # Problem 1
 
-### Imports the data
+### Import the data
 
 The code chunk below imports the data in individual spreadsheets contained in `./data/zip_data/`. To do this, I create a dataframe that includes the list of all files in that directory and the complete path to each file. 
 
@@ -111,8 +111,7 @@ homicide_df =
 homicide_df %>% 
   group_by(city_state) %>% 
   count(city_state) %>% 
-  summarize(n) %>%
-  knitr::kable()
+  summarize(n) 
 ```
 
 From this table, we could find the total number of homicides within 51 cities not 50, and there is one uncommon data from **Tulsa,AL**. Since I know **Tulsa,AL** does not exist in the U.S, we should probably ignore this data from `homicide_df` dataset. 
@@ -127,20 +126,61 @@ tidy_homicide_df =
     homicide_status =  ifelse(disposition != "Closed by arrest", "unsolved", "solved")
   )
 
-tidy_homicide_df %>% 
+
+Unsolve_data = 
+  tidy_homicide_df %>% 
   group_by(city_state) %>% 
   summarize(
     unsolved = sum(homicide_status == "unsolved"),
-    total_homicides = n()) %>% 
-  knitr::kable()
+    total_homicides = n())
+
+Unsolve_data %>% 
+    knitr::kable(col.names = c("city, state", "unsolved homicides cases", "total homicides cases"))
 ```
 
-From this table, we could find the number of unsolved homicides (those for which the disposition is “Closed without arrest” or “Open/No arrest”).
+From this table, we could find the total number of homicides within 50 cities and the number of unsolved homicides (those for which the disposition is “Closed without arrest” or “Open/No arrest”).
 
-### Use the `prop.test` function to estimate the proportion of homicides that are unsolved
+### Estimate the proportion of homicides that are unsolved
+
+Use the `prop.test` function to estimate the proportion of homicides that are unsolved for the city of Baltimore, MD. ANd I pull the estimated proportion and confidence intervals (CI) from the resulting tidy dataframe.
 
 ```{r}
+Baltimore_data = 
+  Unsolve_data %>%
+  filter(city_state == "Baltimore,MD")
 
+  
+Baltimore_test = 
+  prop.test(
+    x = Baltimore_data %>% pull(unsolved),
+    n = Baltimore_data %>% pull(total_homicides)) %>% 
+  broom::tidy() %>% 
+  select(estimate,conf.low,conf.high)
+
+Baltimore_test
 ```
+
+The test results tell us that the estimate proportion of homicides that are unsolved for the city of Baltimore, MD is **0.646** and the 95% confidence interval is **(0.628, 0.663)**. 
+
+### Estimate the proportion for all 50 cities. 
+
+```{r}
+all_test = 
+  Unsolve_data %>% 
+  mutate(
+    proportion = map2(.x = unsolved, .y = total_homicides, ~prop.test(x = .x, n = .y)),
+    proportion = map(proportion, broom::tidy)
+  ) %>% 
+  unnest() %>% 
+  select(city_state, unsolved, total_homicides, estimate, conf.low,conf.high) %>% 
+  knitr::kable(
+    digits = 3,
+    col.names = c("city, state", "unsolved cases", "total cases", "estimate proportion", "lower CI", "upper CI"))
+
+all_test
+```
+
+
+
 
 
