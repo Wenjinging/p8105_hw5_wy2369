@@ -229,7 +229,7 @@ Using iteration to repeat the function and make a dataset `test_results_df` incl
 test_results_df = 
   expand_grid(
     mu = c(0:6),
-    iteration = 1:40) %>%
+    iteration = 1:5000) %>%
   mutate(
     estimate_df =
       map(.x = mu, ~fn_t_test(mu = .x))
@@ -239,7 +239,7 @@ test_results_df =
     reject_null = ifelse(p.value < 0.05, 1, 0))
 ```
 
-### Make a plot showing the association between effect size and power.
+### Make a plot showing the association between effect size and power
 
 This plot shows the proportion of times the null was rejected (the power of the test) on the y axis and the true value of mean on the x axis. 
 
@@ -257,11 +257,9 @@ test_results_df %>%
   ) 
 ```
 
+Based on the plot, proportion of times the null was rejected increases as the true value of mean increases, which means the power of the test increases as true mean increases. Thus I think the association between effect size and power is that power of the test will increases as effect size increases. 
 
-
-Describe the association between effect size and power.
-
-### Make two plots 
+### Make two plots showing average estimate of mean vs true mean 
 
 Make a plot `plot_all` showing the average estimate of mu_hat on the y axis and the true value of mu on the x axis.
 
@@ -276,11 +274,11 @@ test_results_df %>%
   geom_point()+
   geom_line()+
   labs(
-    title = "Association between the true value of mean and estimate of mean",
+    title = "Average estimate of mean vs true mean",
     x = "The true value of mean",
     y = "The average estimate of mean"
   ) +
-  theme(plot.title = element_text(size = 10),text = element_text(size = 6))
+  theme(plot.title = element_text(size = 8),text = element_text(size = 8))
 
 
 plot_reject =
@@ -292,19 +290,16 @@ test_results_df %>%
   geom_point()+
   geom_line()+
   labs(
-    title = "Association between the true value of mean and estimate of mean when null was rejected",
+    title = "Average estimate of mean vs true mean when null was rejected",
     x = "The true value of mean",
     y = "The average estimate of mean"
   ) +
-  theme(plot.title = element_text(size = 10),text = element_text(size = 6))
+  theme(plot.title = element_text(size = 8),text = element_text(size = 8))
 
 plot_all + plot_reject
 ```
 
 
-Is the sample average of μ̂
- across tests for which the null is rejected approximately equal to the true value of μ
-? Why or why not?
 
 
 
