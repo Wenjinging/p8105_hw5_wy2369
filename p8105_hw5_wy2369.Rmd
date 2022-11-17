@@ -216,8 +216,44 @@ fn_t_test = function(n_obs =30, mu = 0, sigma = 5){
   fn_data %>% 
     t.test() %>% 
     broom::tidy() %>% 
-    select(estimate, p_value)
+    select(estimate, p.value)
 }
+```
+
+### Repeat for mean = {0,1,2,3,4,5,6}
+
+Using iteration to repeat the function and make a dataset `test_results_df` includes mu, iteration, estimate, p.value, and reject_null (1 for reject Ho; 0 for fail to reject Ho).
+
+```{r}
+test_results_df = 
+  expand_grid(
+    mu = c(0:6),
+    iteration = 1:40) %>%
+  mutate(
+    estimate_df =
+      map(.x = mu, ~fn_t_test(mu = .x))
+  ) %>%
+  unnest(estimate_df) %>% 
+  mutate(
+    reject_null = ifelse(p.value < 0.05, 1, 0))
+```
+
+### Make a plot 
+
+This plot shows the proportion of times the null was rejected (the power of the test) on the y axis and the true value of mean on the x axis. 
+
+```{r}
+test_results_df %>% 
+  group_by(mu) %>% 
+  summarize(n_total = n(), n_reject = sum(reject_null==1)) %>% 
+  ggplot(aes(x = mu, y = n_reject/n_total)) +
+  geom_point()+
+  geom_line()+
+  labs(
+    title = "Association between effect size and power",
+    x = "The true value of mean",
+    y = "Proportion of times the null was rejected "
+  ) 
 ```
 
 
